@@ -1,22 +1,39 @@
+import axios from 'axios';
 import React, { useRef, type PointerEvent, type Touch, type TouchEvent } from 'react';
+
 import styled from 'styled-components';
 
 import { TRANSPARENT_BACKGROUND_IMAGE } from '~/config/constants';
+
 import { APP_FIXED_MAIN_UNIQUE_ID } from '~/config/globalElementIds';
+
 import { CANVAS_CONTROLS_OVERLAY } from '~/config/globalElementIds';
+
 import type { ActionModeOption } from '~/config/types';
+
 import useCanvasContext from '~/context/useCanvasContext';
+
 import useActionMode from '~/store/useActionMode';
+
 import useActiveObjectId from '~/store/useActiveObjectId';
+
 import useCanvasObjects from '~/store/useCanvasObjects';
+
 import useCanvasWorkingSize from '~/store/useCanvasWorkingSize';
+
 import useDefaultParams from '~/store/useDefaultParams';
+
 import useScrollPosition from '~/store/useScrollPosition';
+
 import useUserMode from '~/store/useUserMode';
+
 import useWindowSize from '~/store/useWindowSize';
+
 import useZoom from '~/store/useZoom';
+
 import theme from '~/theme';
 import generateUniqueId from '~/utils/generateUniqueId';
+
 import getControlPoints from '~/utils/getControlPoints';
 import getCursorFromModes from '~/utils/getCursorFromModes';
 import getDimensionsFromFreeDraw from '~/utils/getDimensionsFromFreeDraw';
@@ -37,7 +54,7 @@ const FixedMain = styled.main`
 
 type PointerOrTouchEvent = PointerEvent<HTMLElement> | TouchEvent<HTMLElement>;
 
-export default function Canvas() {
+export default function Canvas({ setObject }: any) {
   const { canvasRef, contextRef, drawEverything } = useCanvasContext();
 
   const previousTouchRef = useRef<Touch | null>(null);
@@ -80,8 +97,10 @@ export default function Canvas() {
 
   const activeObject = canvasObjects.find((canvasObject) => canvasObject.id === activeObjectId);
 
-  // On pointer down
+  setObject(canvasObjects);
 
+  // On pointer down
+  console.log(canvasObjects);
   const onPointerDown = (event: PointerOrTouchEvent) => {
     event.preventDefault();
     const canvas = canvasRef.current;
@@ -423,58 +442,60 @@ export default function Canvas() {
   };
 
   return (
-    <FixedMain
-      id={APP_FIXED_MAIN_UNIQUE_ID}
-      style={{
-        cursor: getCursorFromModes({ userMode, actionMode }),
-      }}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onTouchStart={onPointerDown}
-      onTouchMove={onPointerMove}
-      onTouchEnd={onPointerUp}
-    >
-      <canvas
-        id={CANVAS_CONTROLS_OVERLAY}
+    <>
+      <FixedMain
+        id={APP_FIXED_MAIN_UNIQUE_ID}
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: `${windowSize.width}px`,
-          height: `${windowSize.height}px`,
-          zIndex: theme.layers.canvasElement + 1,
+          cursor: getCursorFromModes({ userMode, actionMode }),
         }}
-        width={windowSize.width}
-        height={windowSize.height}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          top: scrollPosition.y,
-          left: scrollPosition.x,
-          width: `${canvasWorkingSize.width}px`,
-          height: `${canvasWorkingSize.height}px`,
-          transform: `scale(${zoom / 100})`,
-          zIndex: theme.layers.canvasElement,
-          backgroundImage: `url(${TRANSPARENT_BACKGROUND_IMAGE})`,
-          backgroundColor: 'white',
-        }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onTouchStart={onPointerDown}
+        onTouchMove={onPointerMove}
+        onTouchEnd={onPointerUp}
       >
-        <h1
+        <canvas
+          id={CANVAS_CONTROLS_OVERLAY}
           style={{
             position: 'absolute',
-            top: `${-38 / (zoom / 100)}px`,
-            left: '0',
-            width: `${Number.MAX_SAFE_INTEGER}px`,
-            color: 'white',
-            fontSize: `${20 / (zoom / 100)}px`,
+            top: 0,
+            left: 0,
+            width: `${windowSize.width}px`,
+            height: `${windowSize.height}px`,
+            zIndex: theme.layers.canvasElement + 1,
+          }}
+          width={windowSize.width}
+          height={windowSize.height}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: scrollPosition.y,
+            left: scrollPosition.x,
+            width: `${canvasWorkingSize.width}px`,
+            height: `${canvasWorkingSize.height}px`,
+            transform: `scale(${zoom / 100})`,
+            zIndex: theme.layers.canvasElement,
+            backgroundImage: `url(${TRANSPARENT_BACKGROUND_IMAGE})`,
+            backgroundColor: 'white',
           }}
         >
-          {`${canvasWorkingSize.width} x ${canvasWorkingSize.height} px`}
-        </h1>
-        <canvas ref={canvasRef} width={canvasWorkingSize.width} height={canvasWorkingSize.height} />
-      </div>
-    </FixedMain>
+          <h1
+            style={{
+              position: 'absolute',
+              top: `${-38 / (zoom / 100)}px`,
+              left: '0',
+              width: `${Number.MAX_SAFE_INTEGER}px`,
+              color: 'white',
+              fontSize: `${20 / (zoom / 100)}px`,
+            }}
+          >
+            {`${canvasWorkingSize.width} x ${canvasWorkingSize.height} px`}
+          </h1>
+          <canvas ref={canvasRef} width={canvasWorkingSize.width} height={canvasWorkingSize.height} />
+        </div>
+      </FixedMain>
+    </>
   );
 }

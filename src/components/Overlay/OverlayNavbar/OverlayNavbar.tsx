@@ -1,15 +1,29 @@
 import { ActionIcon, Tooltip } from '@mantine/core';
-import React, { type ReactNode } from 'react';
+
+import axios from 'axios';
+
+import { useRouter } from 'next/router';
+
+import React, { type ReactNode, useState } from 'react';
+
 import { BsSquare, BsCircle, BsImageFill } from 'react-icons/bs';
+
 import { FaMousePointer } from 'react-icons/fa';
+
 import { HiPencil } from 'react-icons/hi';
+
 import { RiImageLine } from 'react-icons/ri';
+
 import { RxText } from 'react-icons/rx';
+
 import styled from 'styled-components';
 
 import type { UserMode } from '~/config/types';
+
 import useActiveObjectId from '~/store/useActiveObjectId';
+
 import useUserMode from '~/store/useUserMode';
+
 import theme from '~/theme';
 
 const Nav = styled.div`
@@ -92,12 +106,25 @@ const userModeButtonsSecondary: UserModeButton[] = [
   },
 ];
 
-export default function OverlayNavbar() {
+export default function OverlayNavbar({ object }: any) {
+  const [name, setName] = useState('');
   const setActiveObjectId = useActiveObjectId((state) => state.setActiveObjectId);
-
+  const router = useRouter();
   const userMode = useUserMode((state) => state.userMode);
   const setUserMode = useUserMode((state) => state.setUserMode);
-
+  const saveCanvasState = async () => {
+    // const canvasState = getCanvasState();
+    console.log('dfd');
+    try {
+      await axios.post('https://sketch-s4dw.onrender.com/api/v1/draw', { name, object });
+      console.log('Canvas state saved successfully.');
+    } catch (error) {
+      console.error('Error saving canvas state:', error);
+    }
+  };
+  const goHome = () => {
+    router.push('/');
+  };
   const renderUserModeButtons = (buttons: UserModeButton[]) => (
     <Div>
       <Ul style={{ gridTemplateColumns: `repeat(${buttons.length}, minmax(0, 1fr))` }}>
@@ -112,7 +139,7 @@ export default function OverlayNavbar() {
               >
                 <ActionIcon
                   color="dark"
-                  variant={isActive ? 'gradient' : 'dark'}
+                  variant={isActive ? 'black' : 'dark'}
                   size="lg"
                   onClick={() => {
                     setUserMode(mode);
@@ -128,11 +155,29 @@ export default function OverlayNavbar() {
       </Ul>
     </Div>
   );
+  const renderSaveButtons = (buttons: UserModeButton[]) => (
+    <Div>
+      <input
+        type="text"
+        onChange={(e) => setName(e.target.value)}
+        name="name"
+        placeholder="Sketch Name"
+        className="input input-bordered input-white mt-2 w-full max-w-xs"
+      />
+      <div onClick={saveCanvasState} className=" z-100 ml-2 flex justify-center items-center bg-transparent p-0 m-0">
+        <button className="btn btn-primary mt-3 ">SAVE</button>
+      </div>
+      <div onClick={goHome} className=" z-100 ml-4 flex justify-center items-center bg-transparent p-0 m-0">
+        <button className="btn btn-primary mt-3 ">Go Home</button>
+      </div>
+    </Div>
+  );
 
   return (
     <Nav>
       {renderUserModeButtons(userModeButtonsPrimary)}
       {renderUserModeButtons(userModeButtonsSecondary)}
+      {renderSaveButtons(userModeButtonsSecondary)}
     </Nav>
   );
 }

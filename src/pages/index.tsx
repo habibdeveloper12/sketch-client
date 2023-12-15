@@ -1,13 +1,18 @@
 import React from 'react';
 
-import PageSEO from '~/components/PageSEO';
-import AppLayout from '~/layouts/AppLayout';
+import Home from '~/components/Home/index';
+
+import Footer from '../components/Footer';
+
+import Header from '../components/Header';
 
 export default function Page() {
   return (
     <>
-      <PageSEO />
-      <AppLayout />
+      <Header>
+        <Home />
+      </Header>
+      <Footer />
     </>
   );
 }
